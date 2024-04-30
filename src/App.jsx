@@ -11,20 +11,77 @@ function App() {
   const { darkTheme, toggleTheme } = useContext(ThemeContext);
 
   const [todos, setTodos] = useState([]);
+  const [filter, setFilter] = useState("all");
 
   const addTodo = (text) => {
+    const capitalizeFirstLetter = (str) => {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    };
     const newTodo = {
       id: Date.now(),
-      text: text.toUpperCase(),
+      text: text
+        .split(" ")
+        .map((word) => capitalizeFirstLetter(word))
+        .join(" "),
       complete: false,
     };
 
     setTodos([...todos, newTodo]);
   };
 
-  const renderTodos = () => {
-    return todos.map((todo, index) => <Item key={index} itemData={todo} />);
-  };
+  function removeTodoById(id) {
+    const todosItems = todos.filter((todo) => todo.id !== id);
+    setTodos(todosItems);
+  }
+
+  function toggleTodoComplete(id) {
+    setTodos(
+      todos.map((todo) => {
+        if (todo.id === id) {
+          return { ...todo, complete: !todo.complete };
+        }
+        return todo;
+      })
+    );
+  }
+
+  function setFilterValue(value) {
+    setFilter(value);
+  }
+
+  function getTodoCount(filter) {
+    if (filter === "all") {
+      return todos.length;
+    } else if (filter === "active") {
+      return todos.filter((todo) => !todo.complete).length;
+    } else if (filter === "complete") {
+      return todos.filter((todo) => todo.complete).length;
+    }
+  }
+
+  function clearCompletedTodos() {
+    const todosItems = todos.filter((todo) => !todo.complete);
+    setTodos(todosItems);
+  }
+
+  function renderTodos() {
+    let filteredTodos = todos;
+
+    if (filter === "active") {
+      filteredTodos = todos.filter((todo) => !todo.complete);
+    } else if (filter === "complete") {
+      filteredTodos = todos.filter((todo) => todo.complete);
+    }
+
+    return filteredTodos.map((todo) => (
+      <Item
+        key={todo.id}
+        itemData={todo}
+        deleteItem={removeTodoById}
+        statusUpdate={toggleTodoComplete}
+      />
+    ));
+  }
 
   return (
     <div
@@ -39,12 +96,17 @@ function App() {
             TODO
           </p>
           {/* Theme Toggle */}
-          <img
-            src={darkTheme ? SunIcon : MoonIcon}
+          <button
+            type="button"
             onClick={toggleTheme}
-            alt="icon"
-            className="h-5 cursor-pointer "
-          />
+            className="h-5 cursor-pointer border-none bg-transparent p-0"
+          >
+            <img
+              src={darkTheme ? SunIcon : MoonIcon}
+              alt="icon"
+              className="h-full"
+            />
+          </button>
         </div>
         {/* Add Todo Form */}
         <div className="mt-8 lg:w-4/6 lg:mx-auto ">
@@ -54,17 +116,27 @@ function App() {
       {/* Todo List Section */}
       <div
         className={`${
-          darkTheme ? "bg-[#25273d]" : "bg-white"
+          darkTheme ? "bg-[#25273d] " : "bg-white"
         } lg:w-4/6 lg:mx-auto  mx-5 relative -top-7 rounded-md`}
       >
-        <BottomNav />
+        <BottomNav filterType={setFilterValue} />
         {renderTodos()}
         {/* Footer Section */}
         <div className="flex justify-between items-center px-5 h-14 text-sm lg:text-[16px] text-[#9495a5]">
-          Add new Todo Item !!!
-          <button className="focus:font-bold" type="button">
-            Clear Completed
-          </button>
+          <p className="mr-2">
+            {todos.length > 0
+              ? `${getTodoCount(filter)} Items left`
+              : "Add new Todo Item !!!"}
+          </p>
+          {todos.length > 0 && (
+            <button
+              className="focus:font-bold"
+              type="button"
+              onClick={clearCompletedTodos}
+            >
+              Clear Completed
+            </button>
+          )}
         </div>
       </div>
     </div>
