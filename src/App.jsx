@@ -90,7 +90,7 @@ function App() {
       } min-h-screen pb-20 relative`}
     >
       {/* Header Section */}
-      <div className="bg-light_header_image_mobile lg:bg-light_header_image bg-no-repeat bg-cover h-52 px-5 lg:px-0 pt-10">
+      <div className="bg-[./public/bg-mobile-light.jpg] lg:bg-[./public/bg-desktop-light.jpg] bg-no-repeat bg-cover h-52 px-5 lg:px-0 pt-10">
         <div className="flex justify-between lg:w-5/6 lg:mx-auto">
           <p className="text-3xl font-semibold text-white tracking-[6px]">
             TODO
